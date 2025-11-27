@@ -1,6 +1,8 @@
 import time
 import base64
 import requests
+import os 
+import json
 
 from solders.transaction import VersionedTransaction
 from solders.keypair import Keypair
@@ -17,11 +19,6 @@ JUP_ORDER_URL = "https://lite-api.jup.ag/ultra/v1/order"
 JUP_EXEC_URL = "https://lite-api.jup.ag/ultra/v1/execute"
 
 SOL_MINT = "So11111111111111111111111111111111111111112"
-
-# load signer (base58 64-byte private key)
-PRIVATE_KEY = "38LKG5Ru1SG2b4FEJk9dTChUpnBGkb8B1B9cRQ3LY2HwqS5Ny7fduiGwL9p4NsrST793PS4iMFRLbSBYStB9UhLb"
-signer = Keypair.from_base58_string(PRIVATE_KEY)
-print(f"Your wallet: {signer.pubkey()}")
 
 
 # ---------------------------
@@ -334,8 +331,24 @@ def get_parent_trade(parent_wallet):
                 return mint 
         prev = curr
 
+def load_config(file_path):
+    with open(os.path.join(file_path, 'private_key.json'), 'r') as file:
+        config = json.load(file)
+    return config
+
 if __name__ == "__main__":
-    PARENT_WALLET = "BAr5csYtpWoNpwhUjixX7ZPHXkUciFZzjBp9uNxZXJPh"
+    # load signer (base58 64-byte private key)
+    dir = "C:/Users/Administrator/Documents/solana-trading/"
+
+    key_config = load_config(dir)
+    print("key config", key_config)
+    PRIVATE_KEY = key_config["wallet_private_key"]
+    print("my private key", PRIVATE_KEY)
+
+    signer = Keypair.from_base58_string(PRIVATE_KEY)
+    print(f"Your wallet: {signer.pubkey()}")
+
+    PARENT_WALLET = "JDd3hy3gQn2V982mi1zqhNqUw1GfV2UL6g76STojCJPN"
     CYCLE_LIMIT = 1
     COPY_AMOUNT = 2000000  # 0.002 SOL lamports (for SOL input) — keep as string when calling create_order
 

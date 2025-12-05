@@ -38,7 +38,7 @@ def is_valid_order(order):
 def get_balances(wallet):
     url = f'https://lite-api.jup.ag/ultra/v1/holdings/{wallet}'
     try:
-        resp = requests.get(url, timeout=6)
+        resp = requests.get(url, timeout=20)
     except Exception as e:
         print("❌ holdings request failed:", e)
         return {}
@@ -315,21 +315,46 @@ def execute_buy_sell_cycle(token_mint, amount, wallet_pubkey):
 # ---------------------------
 # PARENT WATCH + MAIN
 # ---------------------------
-def get_parent_trade(parent_wallet): 
-    prev = get_balances(parent_wallet) 
-    print("\n📡 Monitoring parent wallet...") 
-    while True: 
-        time.sleep(1) 
-        curr = get_balances(parent_wallet) 
-        all_mints = set(prev.keys()) | set(curr.keys()) 
-        for mint in all_mints: 
-            old = prev.get(mint, 0) 
-            new = curr.get(mint, 0) 
-            diff = new - old 
-            if abs(diff) > 0.001: 
-                print(f"\n🔥 Parent trade detected on {mint}") 
-                return mint 
-        prev = curr
+def get_parent_trade(parent_wallet):
+    print("\n📡 Monitoring parent wallet for real trades...\n")
+
+    prev = get_balances(parent_wallet)
+
+    while True:
+        time.sleep(1)
+
+        curr = get_balances(parent_wallet)
+
+        # detect changes only
+        changes = []
+        all_mints = set(prev.keys()) | set(curr.keys())
+
+        for mint in all_mints:
+            old = prev.get(mint, 0)
+            new = curr.get(mint, 0)
+            diff = new - old
+
+            if abs(diff) > 0.01:    # ignore dust
+                changes.append((mint, old, new, diff))
+
+        # no trade happened
+        if not changes:
+            prev = curr
+            continue
+
+        # one trade happened → return ONLY the correct traded token
+        # we return the token whose balance increased (BUY)
+        for mint, old, new, diff in changes:
+            if diff > 0:  # parent BOUGHT this token
+                print("\n🔥 Parent BUY detected!")
+                print("Token:", mint)
+                return mint
+
+        # if no positive diff found, return the first changed token
+        # (this is a fallback, but normally not needed)
+        mint = changes[0][0]
+        print("\n🔥 Parent trade detected (SELL):", mint)
+        return mint
 
 def load_config(file_path):
     with open(os.path.join(file_path, 'private_key.json'), 'r') as file:
@@ -348,9 +373,9 @@ if __name__ == "__main__":
     signer = Keypair.from_base58_string(PRIVATE_KEY)
     print(f"Your wallet: {signer.pubkey()}")
 
-    PARENT_WALLET = "JDd3hy3gQn2V982mi1zqhNqUw1GfV2UL6g76STojCJPN"
+    PARENT_WALLET = "beatXW1PmeVVXxebbyLuc3uKy2Vj8mt6vedBhP9AYXo"
     CYCLE_LIMIT = 1
-    COPY_AMOUNT = 2000000  # 0.002 SOL lamports (for SOL input) — keep as string when calling create_order
+    COPY_AMOUNT = 1000000  # 0.001 SOL lamports (for SOL input) — keep as string when calling create_order
 
     cycles_done = 0
     print("\n🔥 Copy Trading Bot Started 🔥")

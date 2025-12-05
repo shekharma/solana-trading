@@ -13,7 +13,7 @@ from solders.pubkey import Pubkey
 
 client = Client("https://api.mainnet-beta.solana.com")
 
-wallet = Pubkey.from_string("C4JRuZx3nAFGqJ8ZcYuwWhRGxL4N9ZwpsErjfhGqxxAf")
+wallet = Pubkey.from_string("C4ErjfhGqxxAf")
 
 balance = client.get_balance(wallet)
 print("balance---->", balance)

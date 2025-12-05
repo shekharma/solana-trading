@@ -13,7 +13,7 @@ print(client.get_latest_blockhash())
 
 
 # Load your private key (64-byte array)
-PRIVATE_KEY = "38LKG5Ru1SG2b4FEJk9dTChUpnBGkb8B1B9cRQ3LY2HwqS5Ny7fduiGwL9p4NsrST793PS4iMFRLbSBYStB9UhLb"  
+PRIVATE_KEY = "38L9UhLb"  
 signer = Keypair.from_base58_string(PRIVATE_KEY)
 # print(client.get_token_accounts_by_owner(
 #     signer.pubkey(),
@@ -77,7 +77,7 @@ order = get_order(
     outputMint="So11111111111111111111111111111111111111112",
     inputMint="9BB6NFEcjBCtnNLFko2FqVQBq8HHM13kCyYcdQbgpump",
     amount="2000000",
-    taker="JDjKBPrFs9UTZBecYx2PpHNmn1a2vpjVcwSX2dMCCLKZ"
+    taker="JCCLKZ"
 )
 
 # outputMint="EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
